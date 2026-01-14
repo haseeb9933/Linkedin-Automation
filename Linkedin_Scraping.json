@@ -1,0 +1,747 @@
+{
+  "name": "Linkedin_Scraping",
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        160
+      ],
+      "id": "32d3db20-08cd-4988-9fc0-75e6a76d0e2c"
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "name": "Wait 2s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        144
+      ],
+      "id": "8b2757bc-72f3-4ff9-a9e4-0a4c97cbf245",
+      "webhookId": "e1a8d739-d24b-4eb1-9edb-8055eef4ead4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6f79d0b4-04c4-4f36-816f-434de2e33c85",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=ukraine",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "0d3071b2-ae83-41b3-be20-38608940f13d",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=palestine",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "d1078608-8e09-4b12-82d3-822bf835ced0",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=trump",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "324b5601-6c2e-43ca-9d76-1e9cb59ab2ed",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=gender",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "1f4373ad-474e-4e0e-b5fe-a755b035a20a",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=publications",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "c6d159ea-187c-4f0d-a948-e15ddc0f8870",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=democrats",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "eeab5ab0-e06a-426d-a203-0046d0a0ecf4",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=israel",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "13aad07a-4dba-427f-814d-9db2aa251450",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "=lgbtq",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -656,
+        -64
+      ],
+      "id": "ccc64dd2-a3b0-405c-8679-ebad37cf01a8",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"hashtags\": [\n    \"EOSWorldwide\",\n    \"Leadership\",\n    \"Traction\",\n    \"BusinessGrowth\",\n    \"Accountability\"\n  ]\n}",
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1856,
+        48
+      ],
+      "id": "73568c17-701f-4bae-b1e9-8409a70fcf0e",
+      "name": "Hashtag input"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This will hold all of our processed items\nconst outputItems = [];\n\n// Loop through every item that comes into the node\nfor (const item of items) {\n  // Get the list of hashtags from the current item\n  const hashtags = item.json.hashtags;\n\n  // Pick a random index from the array\n  const randomIndex = Math.floor(Math.random() * hashtags.length);\n\n  // Get the hashtag at that random index\n  const selectedHashtag = hashtags[randomIndex];\n\n  // Add the selected hashtag to the current item's data\n  item.json.selectedHashtag = selectedHashtag;\n  \n  // Add the modified item to our output array\n  outputItems.push(item);\n}\n\n// Return the entire array of processed items\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        48
+      ],
+      "id": "bc767cf9-b4ea-4efe-abb2-8f40aca8e1e5",
+      "name": "Random Hashtag"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://c8909ccb21ba.ngrok-free.app/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "=application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "hashtag",
+              "value": "={{ $json.selectedHashtag }}"
+            },
+            {
+              "name": "max_posts",
+              "value": "=5"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1408,
+        48
+      ],
+      "id": "edc185b4-5ec2-4b9d-9108-4d562dba5380",
+      "name": "Scraping"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This code will run once and process all incoming items.\n\nconst allOutputItems = [];\n\n// Loop through each item that comes into the node\nfor (const item of items) {\n  // Your original function to find an array within a single item's data\n  function extractArray(data) {\n    if (data) {\n      if (Array.isArray(data)) return data;\n      if (data.body && Array.isArray(data.body)) return data.body;\n      for (const key in data) {\n        if (Array.isArray(data[key])) return data[key];\n      }\n    }\n    return [];\n  }\n\n  // Find the array within the CURRENT item\n  const postArray = extractArray(item.json);\n\n  // If we found an array of posts, split them into individual output items\n  if (postArray.length > 0) {\n    for (const post of postArray) {\n      allOutputItems.push({ json: post });\n    }\n  } else {\n    // If the item itself is the post, just pass it through\n    allOutputItems.push(item);\n  }\n}\n\nreturn allOutputItems;"
+      },
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        96
+      ],
+      "id": "5aba8fdf-70af-472c-b009-2f991ea4f1e2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        32,
+        112
+      ],
+      "id": "2596960a-68fd-4840-87ea-7b2e8c83a2e2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1GyEzmXo0hrOfhjy-4ECaT6f53XZ4oiCG_NeS9bjBhbA",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GyEzmXo0hrOfhjy-4ECaT6f53XZ4oiCG_NeS9bjBhbA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GyEzmXo0hrOfhjy-4ECaT6f53XZ4oiCG_NeS9bjBhbA/edit#gid=0"
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "author",
+              "fieldValue": "={{ $json.author }}"
+            },
+            {
+              "fieldId": "text",
+              "fieldValue": "={{ $json.text }}"
+            },
+            {
+              "fieldId": "comment",
+              "fieldValue": "={{ $json.content.parts[0].text }}"
+            },
+            {
+              "fieldId": "post_url",
+              "fieldValue": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Log Posts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        992,
+        -48
+      ],
+      "id": "5d6bb41b-b0d4-4a96-a880-c2c06db2ce95",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5jtyIOPVjWX30qlS",
+          "name": "Google Sheets account 14"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://c8909ccb21ba.ngrok-free.app/comment",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_url",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "name": "comment",
+              "value": "={{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "name": "Commenting",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2000,
+        144
+      ],
+      "id": "7e2d3f2f-7d0f-4ccd-a779-f6efef104a91",
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.url }}",
+        "options": {
+          "historySize": 10000
+        }
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        48
+      ],
+      "id": "bd102476-3067-4193-af21-02311e8b6773",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2c62aa94-4966-49a5-aa79-24c420576b39",
+              "leftValue": "={{ $json.quality_result }}",
+              "rightValue": "=yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        -80
+      ],
+      "id": "ba4e68ce-0572-4e53-a51b-7ee8883e8f31",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a strict social media quality control assistant. Your task is to evaluate a proposed comment based on the original LinkedIn post.\n\nYour ONLY output must be a single word: yes or no.\n\nA comment is BAD (output no) if it:\n- Is generic and could apply to any post (e.g., \"Great post!\", \"Thanks for sharing!\").\n- Asks for more information or says the post is missing context.\n- Is irrelevant to the content of the post.\n- Simply rephrases the post title.\n- sounds robotic.\n\nA comment is GOOD (output yes) if it:\n- Directly relates to the specific content of the post.\n- Adds a small, positive thought or asks a relevant question.\n- Sounds like a human wrote it in response to that specific post.",
+              "role": "model"
+            },
+            {
+              "content": "=Original Post:\n{{ $json.text }}\nProposed Comment:\n{{ $json.content.parts[0].text }}\n---\nBased on these rules, is the proposed comment good enough to post? Your answer must be only yes or no."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -80
+      ],
+      "id": "7af57ca0-6ddf-4c8d-a877-838f548672ed",
+      "name": "Quality Check",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TPUg5voIe8J2Eb0k",
+          "name": "Google Gemini(PaLM) Api account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an assistant that writes short, thoughtful, and human-sounding LinkedIn comments (10–40 words) in David’s style. \nYou should:\n- Sound professional, warm, and insightful — not robotic or salesy. \n- Add a small perspective or nuance, not just agree with the post.\n- Avoid repeating the post’s wording.\n- Never include emojis.\n- Keep tone natural, confident, and conversational — not overly polished or formal.\n- Skip buzzwords and filler.\n\nDavid’s voice is confident, grounded, and curious. He values clarity, leadership, and substance — comments should feel authentic, not corporate.\n",
+              "role": "model"
+            },
+            {
+              "content": "=Write a LinkedIn comment for this post text: {{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Writing",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -80
+      ],
+      "id": "18c59876-bd45-4202-b3f7-a641cbff8767",
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TPUg5voIe8J2Eb0k",
+          "name": "Google Gemini(PaLM) Api account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "name": "Merge Back QC + Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1008,
+        128
+      ],
+      "id": "dc7b7e29-fed3-4e06-8979-abd75dfd0bad",
+      "notes": "🔁 Merges the 'yes/no' decision from Quality Check back into the original post + comment data."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "db7d250c-aec0-49b5-894c-becf56d127b7",
+              "name": "quality_result",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        -80
+      ],
+      "id": "d6a36a8f-a623-4ec2-accf-f84f8dce633e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.url }}",
+        "options": {
+          "historySize": 10000
+        }
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        144
+      ],
+      "id": "8120ff4e-f94c-4004-9b5e-4ec4ea5c7229",
+      "name": "Remove Duplicates1"
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.text }}",
+        "options": {
+          "historySize": 10000
+        }
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -992,
+        48
+      ],
+      "id": "0df31e05-2308-450e-b2b0-8b2f0799cca4",
+      "name": "Remove Duplicates2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2032,
+        48
+      ],
+      "id": "5e43d40f-c2a2-45c3-b8c8-cc20b3ac8db6",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2s": {
+      "main": [
+        [
+          {
+            "node": "Commenting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hashtag input": {
+      "main": [
+        [
+          {
+            "node": "Random Hashtag",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Random Hashtag": {
+      "main": [
+        [
+          {
+            "node": "Scraping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scraping": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Writing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Quality Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Back QC + Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commenting": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Check": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Back QC + Data": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge Back QC + Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates1": {
+      "main": [
+        [
+          {
+            "node": "Wait 2s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates2": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Hashtag input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a82dc3f9-9efc-4f0d-a02a-1727a33e04a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "07dcb4eff5cec83f8adf60b88df62464865d575cce2cc1131fb9c986bf1a088a"
+  },
+  "id": "m9lPc646dPYSVSdU",
+  "tags": []
+}
